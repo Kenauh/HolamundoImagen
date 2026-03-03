@@ -124,7 +124,7 @@
         android:id="@+id/imageButton"
         android:layout_width="169dp"
         android:layout_height="110dp"
-        android:onClick="pizza"
+        android:onClick="irAPizzas"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.066"

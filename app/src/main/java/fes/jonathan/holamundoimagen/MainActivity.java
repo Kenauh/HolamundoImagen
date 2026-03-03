@@ -1,5 +1,6 @@
 package fes.jonathan.holamundoimagen;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -25,12 +26,13 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    String baseUrl = "https://2d99lsm9-3000.usw3.devtunnels.ms";
 
-    String url = "https://2d99lsm9-3000.usw3.devtunnels.ms/images/menus/breads.png";
-    String url2 = "https://2d99lsm9-3000.usw3.devtunnels.ms/images/menus/pizza.png";
-    String url3 = "https://2d99lsm9-3000.usw3.devtunnels.ms/images/menus/chicken.png";
-    String url4 = "https://2d99lsm9-3000.usw3.devtunnels.ms/images/menus/dessert.png";
-    String url5 = "https://2d99lsm9-3000.usw3.devtunnels.ms/images/menus/drinks.png";
+    String url = baseUrl + "/images/menus/breads.png";
+    String url2 = baseUrl + "/images/menus/pizza.png";
+    String url3 = baseUrl + "/images/menus/chicken.png";
+    String url4 = baseUrl + "/images/menus/dessert.png";
+    String url5 = baseUrl + "/images/menus/drinks.png";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +63,11 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    }
+
+    public void irAPizzas(View view) {
+        Intent intent = new Intent(this, pizzas.class);
+        startActivity(intent);
     }
 
     public void pizza(View view) {
