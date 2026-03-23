@@ -4,7 +4,7 @@ public class Validador {
 
     // Solo letras y espacios — sin números ni caracteres especiales
     public static boolean esNombreValido(String texto) {
-        return texto.matches("[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ ]+");
+        return texto.matches("[a-zA-ZáéíóúÁÉÍÓÚüÜ ]+");
     }
 
     // Formato de correo válido
