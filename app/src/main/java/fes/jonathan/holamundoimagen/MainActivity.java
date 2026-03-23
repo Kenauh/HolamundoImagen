@@ -64,6 +64,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    public void irALogin(View view) {
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+    }
 
     public void irAPizzas(View view) {
         Intent intent = new Intent(this, pizzas.class);
