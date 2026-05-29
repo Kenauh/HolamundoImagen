@@ -20,18 +20,6 @@ import fes.jonathan.holamundoimagen.carrito.CarritoManager;
 import fes.jonathan.holamundoimagen.models.ProductoDto;
 import fes.jonathan.holamundoimagen.viewmodel.PizzasViewModel;
 
-/**
- * Catálogo genérico — muestra productos de cualquier categoría.
- *
- * Se lanza con:
- *   Intent intent = new Intent(ctx, CatalogoActivity.class);
- *   intent.putExtra(CatalogoActivity.EXTRA_CATEGORIA, CatalogoActivity.CAT_BEBIDAS);
- *
- * Categorías soportadas: CAT_PIZZAS, CAT_POLLOS, CAT_BEBIDAS, CAT_ADICIONALES.
- *
- * Las pizzas van a PizzaDetalleActivity para elegir tamaño/masa.
- * El resto se agrega directo al carrito desde aquí.
- */
 public class CatalogoActivity extends AppCompatActivity {
 
     public static final String EXTRA_CATEGORIA  = "categoria";
@@ -40,11 +28,11 @@ public class CatalogoActivity extends AppCompatActivity {
     public static final String CAT_BEBIDAS      = "bebidas";
     public static final String CAT_ADICIONALES  = "adicionales";
 
-    private PizzasViewModel  viewModel;
-    private ProductoAdapter  adapter;
-    private ProgressBar      progressBar;
-    private RecyclerView     rvProductos;
-    private String           categoria;
+    private PizzasViewModel viewModel;
+    private ProductoAdapter adapter;
+    private ProgressBar     progressBar;
+    private RecyclerView    rvProductos;
+    private String          categoria;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +42,6 @@ public class CatalogoActivity extends AppCompatActivity {
         categoria = getIntent().getStringExtra(EXTRA_CATEGORIA);
         if (categoria == null) categoria = CAT_PIZZAS;
 
-        // ── Toolbar con título dinámico ─────────────────────────────────
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -62,16 +49,13 @@ public class CatalogoActivity extends AppCompatActivity {
             getSupportActionBar().setTitle(tituloDe(categoria));
         }
 
-        // ── Vistas ─────────────────────────────────────────────────────
-        progressBar  = findViewById(R.id.progressBar);
-        rvProductos  = findViewById(R.id.rvProductos);
+        progressBar = findViewById(R.id.progressBar);
+        rvProductos = findViewById(R.id.rvProductos);
 
-        // ── Adapter ─────────────────────────────────────────────────────
         adapter = new ProductoAdapter(this::onProductoClick);
         rvProductos.setLayoutManager(new GridLayoutManager(this, 2));
         rvProductos.setAdapter(adapter);
 
-        // ── ViewModel ───────────────────────────────────────────────────
         viewModel = new ViewModelProvider(this).get(PizzasViewModel.class);
 
         viewModel.isLoading().observe(this, loading ->
@@ -90,8 +74,6 @@ public class CatalogoActivity extends AppCompatActivity {
         if (item.getItemId() == android.R.id.home) { onBackPressed(); return true; }
         return super.onOptionsItemSelected(item);
     }
-
-    // ── Carga la lista correcta según la categoría ──────────────────────
 
     private void cargarCategoria() {
         switch (categoria) {
@@ -115,20 +97,16 @@ public class CatalogoActivity extends AppCompatActivity {
         }
     }
 
-    // ── Click en un producto ─────────────────────────────────────────────
-
     private void onProductoClick(ProductoDto producto) {
         if (CAT_PIZZAS.equals(categoria)) {
-            // Pizzas → pantalla de detalle para elegir tamaño y masa
             Intent intent = new Intent(this, PizzaDetalleActivity.class);
-            intent.putExtra("id",          producto.getId());
-            intent.putExtra("nombre",      producto.getNombre());
-            intent.putExtra("descripcion", producto.getDescripcion());
-            intent.putExtra("ingredientes",producto.getIngredientes());
-            intent.putExtra("ruta",        producto.getRuta());
+            intent.putExtra("id",           producto.getId());
+            intent.putExtra("nombre",       producto.getNombre());
+            intent.putExtra("descripcion",  producto.getDescripcion());
+            intent.putExtra("ingredientes", producto.getIngredientes());
+            intent.putExtra("ruta",         producto.getRuta());
             startActivity(intent);
         } else {
-            // Pollos / Bebidas / Adicionales → agregar directo al carrito
             CarritoManager.getInstance().agregarProducto(producto);
             Snackbar.make(rvProductos,
                     "\"" + producto.getNombre() + "\" agregado al carrito",
@@ -138,8 +116,6 @@ public class CatalogoActivity extends AppCompatActivity {
                     .show();
         }
     }
-
-    // ── Título según categoría ───────────────────────────────────────────
 
     private String tituloDe(String cat) {
         switch (cat) {

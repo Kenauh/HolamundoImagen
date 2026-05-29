@@ -17,20 +17,13 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import fes.jonathan.holamundoimagen.R;
 import fes.jonathan.holamundoimagen.models.ProductoDto;
 
-/**
- * Adapter genérico para cualquier lista de ProductoDto.
- *
- * FIX imágenes:
- *  - BASE_URL sin slash final
- *  - La ruta puede venir como "/api/Pizzas/images/..." o "images/..."
- *  - Se normaliza siempre para obtener una URL absoluta válida
- *  - diskCacheStrategy(ALL) para reducir peticiones repetidas
- */
 public class ProductoAdapter extends ListAdapter<ProductoDto, ProductoAdapter.ViewHolder> {
 
     private static final String BASE_URL = "https://utilidades.vmartinez84.xyz";
 
-    public interface OnClickListener { void onClick(ProductoDto producto); }
+    public interface OnClickListener {
+        void onClick(ProductoDto producto);
+    }
 
     private final OnClickListener listener;
 
@@ -60,15 +53,10 @@ public class ProductoAdapter extends ListAdapter<ProductoDto, ProductoAdapter.Vi
             h.tvPrecio.setVisibility(View.GONE);
         }
 
-        // ── Cargar imagen con URL absoluta correcta ───────────────────────
         String ruta = p.getRuta();
         if (ruta != null && !ruta.isEmpty()) {
-            String imageUrl;
-            if (ruta.startsWith("http")) {
-                imageUrl = ruta;
-            } else {
-                imageUrl = BASE_URL + (ruta.startsWith("/") ? ruta : "/" + ruta);
-            }
+            String imageUrl = ruta.startsWith("http") ? ruta
+                    : BASE_URL + (ruta.startsWith("/") ? ruta : "/" + ruta);
             Glide.with(h.itemView.getContext())
                     .load(imageUrl)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -83,8 +71,6 @@ public class ProductoAdapter extends ListAdapter<ProductoDto, ProductoAdapter.Vi
         h.itemView.setOnClickListener(v -> listener.onClick(p));
     }
 
-    // ── ViewHolder ────────────────────────────────────────────────────────
-
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivImagen;
         TextView  tvNombre;
@@ -98,21 +84,21 @@ public class ProductoAdapter extends ListAdapter<ProductoDto, ProductoAdapter.Vi
         }
     }
 
-    // ── DiffUtil ──────────────────────────────────────────────────────────
-
     private static final DiffUtil.ItemCallback<ProductoDto> DIFF =
             new DiffUtil.ItemCallback<ProductoDto>() {
                 @Override
                 public boolean areItemsTheSame(@NonNull ProductoDto a, @NonNull ProductoDto b) {
                     return a.getId() == b.getId();
                 }
+
                 @Override
                 public boolean areContentsTheSame(@NonNull ProductoDto a, @NonNull ProductoDto b) {
                     return a.getId() == b.getId()
-                            && equals(a.getNombre(), b.getNombre())
+                            && strEquals(a.getNombre(), b.getNombre())
                             && a.getPrecio() == b.getPrecio();
                 }
-                private boolean equals(String a, String b) {
+
+                private boolean strEquals(String a, String b) {
                     if (a == null && b == null) return true;
                     if (a == null || b == null) return false;
                     return a.equals(b);

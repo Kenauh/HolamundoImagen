@@ -21,19 +21,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Fase 4 — Historial de la orden activa del cliente autenticado.
- *
- * Llama a GET /api/Pizzas/Clientes/Ordenes (requiere JWT).
- * El AuthInterceptor adjunta el token automáticamente.
- *
- * Muestra:
- *   - Estado y método de pago
- *   - Lista de pizzas del pedido
- *   - Lista de productos (pollos, bebidas, adicionales)
- *
- * Manejo de 401: muestra mensaje claro invitando a iniciar sesión.
- */
 public class HistorialActivity extends AppCompatActivity {
 
     private ProgressBar progressBar;
@@ -65,15 +52,12 @@ public class HistorialActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // ── Carga la orden desde la API ──────────────────────────────────────
-
     private void cargarOrden() {
         progressBar.setVisibility(View.VISIBLE);
         tvContenido.setText("");
         tvEstado.setText("");
 
-        PizzaRepository repo = new PizzaRepository();
-        repo.obtenerOrden().enqueue(new Callback<OrdenDto>() {
+        new PizzaRepository().obtenerOrden().enqueue(new Callback<OrdenDto>() {
             @Override
             public void onResponse(@NonNull Call<OrdenDto> call,
                                    @NonNull Response<OrdenDto> response) {
@@ -101,46 +85,35 @@ public class HistorialActivity extends AppCompatActivity {
         });
     }
 
-    // ── Renderiza la orden en pantalla ───────────────────────────────────
-
     private void mostrarOrden(OrdenDto orden) {
         StringBuilder sb = new StringBuilder();
 
-        // Estado y pago
         String estado = orden.getEstado() != null ? orden.getEstado() : "En proceso";
         String metodo = orden.getMetodoDePago() != null ? orden.getMetodoDePago() : "—";
         tvEstado.setText("Estado: " + estado + "   |   Pago: " + metodo);
 
-        // Pizzas
         if (orden.getPizzas() != null && !orden.getPizzas().isEmpty()) {
-            sb.append("🍕 Pizzas\n");
-            sb.append("─────────────────────────\n");
+            sb.append("🍕 Pizzas\n─────────────────────────\n");
             for (PizzaDto pizza : orden.getPizzas()) {
                 String nombre = pizza.getNombre1() != null ? pizza.getNombre1() : "Pizza";
                 if (pizza.getNombre2() != null && !pizza.getNombre2().isEmpty()) {
                     nombre += " / " + pizza.getNombre2();
                 }
                 String tam  = pizza.getTamanio() != null ? pizza.getTamanio() : "";
-                String masa = pizza.getMasa()     != null ? pizza.getMasa()    : "";
+                String masa = pizza.getMasa()    != null ? pizza.getMasa()    : "";
                 sb.append("• ").append(nombre)
                   .append("  (").append(tam).append(" — ").append(masa).append(")\n")
                   .append("  $").append(String.format("%.2f", pizza.getPrecio())).append("\n\n");
             }
         }
 
-        // Productos (pollos, bebidas, adicionales)
         if (orden.getProductos() != null && !orden.getProductos().isEmpty()) {
-            sb.append("🛒 Productos\n");
-            sb.append("─────────────────────────\n");
+            sb.append("🛒 Productos\n─────────────────────────\n");
             for (ProductoDto p : orden.getProductos()) {
                 sb.append("• ").append(p.getNombre() != null ? p.getNombre() : "Producto").append("\n");
             }
         }
 
-        if (sb.length() == 0) {
-            tvContenido.setText("La orden está vacía.");
-        } else {
-            tvContenido.setText(sb.toString());
-        }
+        tvContenido.setText(sb.length() == 0 ? "La orden está vacía." : sb.toString());
     }
 }

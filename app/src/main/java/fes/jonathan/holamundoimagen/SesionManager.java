@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class SesionManager {
+
     private static final String PREF_NAME      = "session";
     private static final String KEY_TOKEN      = "token";
     private static final String KEY_EXPIRACION = "expiracion";
@@ -23,11 +24,9 @@ public class SesionManager {
                 .apply();
     }
 
-    public String getToken()      { return prefs.getString(KEY_TOKEN, null); }
-    public String getExpiracion() { return prefs.getString(KEY_EXPIRACION, null); }
-    public String getCorreo()     { return prefs.getString(KEY_CORREO, null); }
-
-    public boolean haySesion()    { return getToken() != null; }
-
-    public void cerrarSesion()    { prefs.edit().clear().apply(); }
+    public String  getToken()      { return prefs.getString(KEY_TOKEN, null); }
+    public String  getExpiracion() { return prefs.getString(KEY_EXPIRACION, null); }
+    public String  getCorreo()     { return prefs.getString(KEY_CORREO, null); }
+    public boolean haySesion()     { return getToken() != null; }
+    public void    cerrarSesion()  { prefs.edit().clear().apply(); }
 }

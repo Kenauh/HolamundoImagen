@@ -18,17 +18,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Pantalla de registro de nuevo cliente.
- *
- * CAMBIOS respecto a la versión anterior:
- *   - Callback ahora usa IdDto (respuesta real del Swagger para POST /Clientes).
- *   - La validación de nombre y apellidos delega en Validador.java.
- */
 public class RegistroActivity extends AppCompatActivity {
 
-    private EditText etNombre, etApellidos, etCorreo, etContrasenia;
-    private Button btnRegistrar;
+    private EditText    etNombre, etApellidos, etCorreo, etContrasenia;
+    private Button      btnRegistrar;
     private ProgressBar progressBar;
 
     @Override
@@ -45,9 +38,7 @@ public class RegistroActivity extends AppCompatActivity {
         TextView tvIrLogin = findViewById(R.id.tvIrLogin);
 
         btnRegistrar.setOnClickListener(v -> {
-            if (validarCampos()) {
-                registrar();
-            }
+            if (validarCampos()) registrar();
         });
 
         tvIrLogin.setOnClickListener(v -> finish());
@@ -60,7 +51,6 @@ public class RegistroActivity extends AppCompatActivity {
         String contrasenia = etContrasenia.getText().toString().trim();
         boolean valido = true;
 
-        // Nombre — usa Validador en lugar de duplicar la regex
         if (nombre.isEmpty()) {
             etNombre.setError("El nombre es obligatorio");
             valido = false;
@@ -74,7 +64,6 @@ public class RegistroActivity extends AppCompatActivity {
             etNombre.setError(null);
         }
 
-        // Apellidos — usa Validador
         if (apellidos.isEmpty()) {
             etApellidos.setError("Los apellidos son obligatorios");
             valido = false;
@@ -88,7 +77,6 @@ public class RegistroActivity extends AppCompatActivity {
             etApellidos.setError(null);
         }
 
-        // Correo — usa Validador
         if (correo.isEmpty()) {
             etCorreo.setError("El correo es obligatorio");
             valido = false;
@@ -99,7 +87,6 @@ public class RegistroActivity extends AppCompatActivity {
             etCorreo.setError(null);
         }
 
-        // Contraseña — usa Validador (mín 8, máx 12 según Swagger)
         if (contrasenia.isEmpty()) {
             etContrasenia.setError("La contraseña es obligatoria");
             valido = false;
@@ -123,33 +110,23 @@ public class RegistroActivity extends AppCompatActivity {
         String contrasenia = etContrasenia.getText().toString().trim();
 
         String encodedKey = Base64.encodeToString(correo.getBytes(), Base64.NO_WRAP);
-
-        ClienteModel cliente = new ClienteModel(
-                encodedKey, nombre, apellidos, correo, contrasenia
-        );
+        ClienteModel cliente = new ClienteModel(encodedKey, nombre, apellidos, correo, contrasenia);
 
         setFormularioHabilitado(false);
 
         PizzasService service = ApiClient.getService();
-
-        // ── Ahora usa IdDto — tipo correcto según el Swagger ──
         service.registrarCliente(cliente).enqueue(new Callback<IdDto>() {
             @Override
             public void onResponse(Call<IdDto> call, Response<IdDto> response) {
                 setFormularioHabilitado(true);
 
                 if (response.code() == 201) {
-                    // Cuenta creada exitosamente
                     Toast.makeText(RegistroActivity.this,
-                            "¡Cuenta creada! Ya puedes iniciar sesión",
-                            Toast.LENGTH_LONG).show();
+                            "¡Cuenta creada! Ya puedes iniciar sesión", Toast.LENGTH_LONG).show();
                     finish();
-
                 } else if (response.code() == 200) {
-                    // El servidor devuelve 200 cuando el correo ya está registrado
                     etCorreo.setError("Este correo ya está registrado");
                     etCorreo.requestFocus();
-
                 } else {
                     Toast.makeText(RegistroActivity.this,
                             "Error " + response.code() + ", intenta de nuevo",
@@ -161,8 +138,7 @@ public class RegistroActivity extends AppCompatActivity {
             public void onFailure(Call<IdDto> call, Throwable t) {
                 setFormularioHabilitado(true);
                 Toast.makeText(RegistroActivity.this,
-                        "Sin conexión, verifica tu internet",
-                        Toast.LENGTH_LONG).show();
+                        "Sin conexión, verifica tu internet", Toast.LENGTH_LONG).show();
             }
         });
     }

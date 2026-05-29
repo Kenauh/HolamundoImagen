@@ -4,20 +4,13 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-/**
- * Body del POST /api/Pizzas/Clientes/Ordenes.
- *
- * FIX: el campo "productos" ahora usa ProductoDtoSimple (solo { id })
- * en lugar de ProductoDto completo, lo que causaba el error 500.
- * El servidor rechaza campos extra que no reconoce en ese contexto.
- */
 public class OrdenDtoIn {
 
     @SerializedName("encodedkey")
     private String encodedKey;
 
     @SerializedName("productos")
-    private List<ProductoDtoSimple> productos;   // ← solo id, no el DTO completo
+    private List<ProductoDtoSimple> productos;
 
     @SerializedName("pizzas")
     private List<PizzaDtoIn> pizzas;

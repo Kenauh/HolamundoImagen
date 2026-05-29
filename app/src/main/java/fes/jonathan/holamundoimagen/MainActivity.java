@@ -16,19 +16,8 @@ import com.bumptech.glide.Glide;
 
 import fes.jonathan.holamundoimagen.carrito.CarritoManager;
 
-/**
- * Pantalla principal — menú de categorías.
- *
- * Correcciones Fase 4:
- *  - URLs de imágenes arregladas: base correcta es https://utilidades.vmartinez84.xyz
- *  - Cada categoría navega a CatalogoActivity con el extra "categoria"
- *  - FAB de carrito con badge de cantidad
- *  - Botón de historial de órdenes
- *  - Login/CerrarSesión se mantienen
- */
 public class MainActivity extends AppCompatActivity {
 
-    // URL base CORRECTA — sin el path de la API
     private static final String BASE = "https://utilidades.vmartinez84.xyz";
 
     @Override
@@ -42,12 +31,11 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        // ── Cargar imágenes de menú con URLs correctas ──────────────────
-        ImageButton btnPizzas     = findViewById(R.id.imageButton);
-        ImageButton btnEntradas   = findViewById(R.id.imageButton2);
-        ImageButton btnPollo      = findViewById(R.id.imageButton3);
-        ImageButton btnPostres    = findViewById(R.id.imageButton4);
-        ImageButton btnBebidas    = findViewById(R.id.imageButton5);
+        ImageButton btnPizzas   = findViewById(R.id.imageButton);
+        ImageButton btnEntradas = findViewById(R.id.imageButton2);
+        ImageButton btnPollo    = findViewById(R.id.imageButton3);
+        ImageButton btnPostres  = findViewById(R.id.imageButton4);
+        ImageButton btnBebidas  = findViewById(R.id.imageButton5);
 
         Glide.with(this).load(BASE + "/images/menus/pizza.png")   .into(btnPizzas);
         Glide.with(this).load(BASE + "/images/menus/breads.png")  .into(btnEntradas);
@@ -55,52 +43,28 @@ public class MainActivity extends AppCompatActivity {
         Glide.with(this).load(BASE + "/images/menus/dessert.png") .into(btnPostres);
         Glide.with(this).load(BASE + "/images/menus/drinks.png")  .into(btnBebidas);
 
-        // ── Badge del carrito en el FAB ──────────────────────────────────
         actualizarBadgeCarrito();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Refrescar badge cada vez que se vuelve a esta pantalla
         actualizarBadgeCarrito();
     }
-
-    // ── Navegación al carrito ────────────────────────────────────────────
 
     public void irAlCarrito(View view) {
         startActivity(new Intent(this, CarritoActivity.class));
     }
 
-    // ── Navegación al historial ──────────────────────────────────────────
-
     public void irAlHistorial(View view) {
         startActivity(new Intent(this, HistorialActivity.class));
     }
 
-    // ── Navegación a categorías ──────────────────────────────────────────
-
-    public void irAPizzas(View view) {
-        abrirCatalogo(CatalogoActivity.CAT_PIZZAS);
-    }
-
-    public void Entradas(View view) {
-        abrirCatalogo(CatalogoActivity.CAT_ADICIONALES);
-    }
-
-    public void Pollo(View view) {
-        abrirCatalogo(CatalogoActivity.CAT_POLLOS);
-    }
-
-    public void Postres(View view) {
-        abrirCatalogo(CatalogoActivity.CAT_ADICIONALES);
-    }
-
-    public void Bebidas(View view) {
-        abrirCatalogo(CatalogoActivity.CAT_BEBIDAS);
-    }
-
-    // ── Login / Cerrar sesión ────────────────────────────────────────────
+    public void irAPizzas(View view)  { abrirCatalogo(CatalogoActivity.CAT_PIZZAS); }
+    public void Entradas(View view)   { abrirCatalogo(CatalogoActivity.CAT_ADICIONALES); }
+    public void Pollo(View view)      { abrirCatalogo(CatalogoActivity.CAT_POLLOS); }
+    public void Postres(View view)    { abrirCatalogo(CatalogoActivity.CAT_ADICIONALES); }
+    public void Bebidas(View view)    { abrirCatalogo(CatalogoActivity.CAT_BEBIDAS); }
 
     public void irALogin(View view) {
         startActivity(new Intent(this, LoginActivity.class));
@@ -112,8 +76,6 @@ public class MainActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
-
-    // ── Helpers ─────────────────────────────────────────────────────────
 
     private void abrirCatalogo(String categoria) {
         Intent intent = new Intent(this, CatalogoActivity.class);

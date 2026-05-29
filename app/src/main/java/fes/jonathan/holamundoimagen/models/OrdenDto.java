@@ -4,14 +4,6 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-/**
- * Mapea el schema OrdenDto del Swagger (lectura).
- * Respuesta del GET /api/Pizzas/Clientes/Ordenes (endpoint protegido con JWT).
- *
- * Contiene la orden activa del cliente autenticado:
- * los productos adicionales, las pizzas configuradas,
- * el método de pago y el estado actual de la orden.
- */
 public class OrdenDto {
 
     @SerializedName("productos")

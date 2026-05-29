@@ -35,15 +35,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Carrito de compras — Fase 4 (corregida).
- *
- * Correcciones:
- *  - Usa ProductoDtoSimple (solo id) al enviar la orden → evita el error 500
- *  - Toolbar azul con botón ← funcional
- *  - Selector de método de pago (Efectivo / Tarjeta)
- *  - Botón "Cancelar pedido" que vacía el carrito con confirmación
- */
 public class CarritoActivity extends AppCompatActivity {
 
     private RecyclerView   rvCarrito;
@@ -63,7 +54,6 @@ public class CarritoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_carrito);
 
-        // ── Toolbar con back ──────────────────────────────────────────────
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -71,7 +61,6 @@ public class CarritoActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Mi carrito");
         }
 
-        // ── Vistas ────────────────────────────────────────────────────────
         rootView          = findViewById(R.id.rootCarrito);
         rvCarrito         = findViewById(R.id.rvCarrito);
         tvTotal           = findViewById(R.id.tvTotal);
@@ -81,13 +70,10 @@ public class CarritoActivity extends AppCompatActivity {
         spinnerMetodoPago = findViewById(R.id.spinnerMetodoPago);
         progressBar       = findViewById(R.id.progressCarrito);
 
-        // ── Spinner de método de pago ─────────────────────────────────────
-        ArrayAdapter<String> metodos = new ArrayAdapter<>(this,
+        spinnerMetodoPago.setAdapter(new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"Efectivo", "Tarjeta"});
-        spinnerMetodoPago.setAdapter(metodos);
+                new String[]{"Efectivo", "Tarjeta"}));
 
-        // ── Adapter con callback de eliminación ───────────────────────────
         adapter = new CarritoAdapter(posicion -> {
             CarritoManager.getInstance().eliminarItem(posicion);
             refrescarUI();
@@ -108,8 +94,6 @@ public class CarritoActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // ── UI ────────────────────────────────────────────────────────────────
-
     private void refrescarUI() {
         List<CarritoItem> items = CarritoManager.getInstance().getItems();
         adapter.submitList(new ArrayList<>(items));
@@ -120,11 +104,8 @@ public class CarritoActivity extends AppCompatActivity {
         btnConfirmar.setEnabled(!vacio);
         btnCancelar.setEnabled(!vacio);
         spinnerMetodoPago.setEnabled(!vacio);
-
         tvTotal.setText(String.format("Total: $%.0f", CarritoManager.getInstance().getTotal()));
     }
-
-    // ── Cancelar pedido ───────────────────────────────────────────────────
 
     private void mostrarDialogoCancelar() {
         new AlertDialog.Builder(this)
@@ -139,20 +120,15 @@ public class CarritoActivity extends AppCompatActivity {
                 .show();
     }
 
-    // ── Confirmar pedido ──────────────────────────────────────────────────
-
     private void confirmarPedido() {
         if (!new SesionManager(this).haySesion()) {
-            Snackbar.make(rootView,
-                    "Inicia sesión para confirmar tu pedido.",
-                    Snackbar.LENGTH_LONG)
+            Snackbar.make(rootView, "Inicia sesión para confirmar tu pedido.", Snackbar.LENGTH_LONG)
                     .setAction("Iniciar sesión", v ->
                             startActivity(new Intent(this, LoginActivity.class)))
                     .show();
             return;
         }
 
-        // Separar pizzas y productos — productos como IDs simples
         List<PizzaDtoIn>        pizzasOut    = new ArrayList<>();
         List<ProductoDtoSimple> productosOut = new ArrayList<>();
 
@@ -160,15 +136,12 @@ public class CarritoActivity extends AppCompatActivity {
             if (item.getTipo() == CarritoItem.Tipo.PIZZA) {
                 PizzaDtoIn p = new PizzaDtoIn(
                         item.getProducto().getId(),
-                        item.getMasa()    != null ? item.getMasa().getId()              : 1,
-                        item.getTamanio() != null ? item.getTamanio().getDescripcion()  : ""
+                        item.getMasa()    != null ? item.getMasa().getId()             : 1,
+                        item.getTamanio() != null ? item.getTamanio().getDescripcion() : ""
                 );
-                if (item.getPizza2() != null) {
-                    p.setPizza2Id(item.getPizza2().getId());
-                }
+                if (item.getPizza2() != null) p.setPizza2Id(item.getPizza2().getId());
                 pizzasOut.add(p);
             } else {
-                // Solo enviamos el id — evita error 500
                 productosOut.add(new ProductoDtoSimple(item.getProducto().getId()));
             }
         }
@@ -198,8 +171,7 @@ public class CarritoActivity extends AppCompatActivity {
                             .setNegativeButton("Cerrar", null)
                             .show();
                 } else if (response.code() == 401) {
-                    Snackbar.make(rootView,
-                            "Sesión expirada. Inicia sesión de nuevo.",
+                    Snackbar.make(rootView, "Sesión expirada. Inicia sesión de nuevo.",
                             Snackbar.LENGTH_LONG)
                             .setAction("Login", v ->
                                     startActivity(new Intent(CarritoActivity.this,
@@ -215,8 +187,7 @@ public class CarritoActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<IdDto> call, @NonNull Throwable t) {
                 setFormHabilitado(true);
-                Snackbar.make(rootView,
-                        "Sin conexión. Verifica tu internet.",
+                Snackbar.make(rootView, "Sin conexión. Verifica tu internet.",
                         Snackbar.LENGTH_LONG).show();
             }
         });

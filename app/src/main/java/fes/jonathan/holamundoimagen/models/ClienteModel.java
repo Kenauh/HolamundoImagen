@@ -18,7 +18,6 @@ public class ClienteModel {
     @SerializedName("contrasenia")
     private String contrasenia;
 
-    // Constructor para registro
     public ClienteModel(String encodedKey, String nombre, String apellidos,
                         String correo, String contrasenia) {
         this.encodedKey  = encodedKey;
@@ -28,7 +27,6 @@ public class ClienteModel {
         this.contrasenia = contrasenia;
     }
 
-    // Getters
     public String getEncodedKey()  { return encodedKey; }
     public String getNombre()      { return nombre; }
     public String getApellidos()   { return apellidos; }

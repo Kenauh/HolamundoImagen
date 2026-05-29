@@ -20,8 +20,8 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText etCorreo, etContrasenia;
-    private Button btnLogin;
+    private EditText    etCorreo, etContrasenia;
+    private Button      btnLogin;
     private ProgressBar progressBar;
 
     @Override
@@ -29,7 +29,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Si ya hay sesión activa, salta directo al inicio
         if (new SesionManager(this).haySesion()) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
@@ -43,14 +42,11 @@ public class LoginActivity extends AppCompatActivity {
         TextView tvIrRegistro = findViewById(R.id.tvIrRegistro);
 
         btnLogin.setOnClickListener(v -> {
-            if (validarCampos()) {
-                iniciarSesion();
-            }
+            if (validarCampos()) iniciarSesion();
         });
 
         tvIrRegistro.setOnClickListener(v ->
-                startActivity(new Intent(this, RegistroActivity.class))
-        );
+                startActivity(new Intent(this, RegistroActivity.class)));
     }
 
     private boolean validarCampos() {
@@ -58,7 +54,6 @@ public class LoginActivity extends AppCompatActivity {
         String contrasenia = etContrasenia.getText().toString().trim();
         boolean valido = true;
 
-        // Correo
         if (correo.isEmpty()) {
             etCorreo.setError("El correo es obligatorio");
             valido = false;
@@ -69,7 +64,6 @@ public class LoginActivity extends AppCompatActivity {
             etCorreo.setError(null);
         }
 
-        // Contraseña
         if (contrasenia.isEmpty()) {
             etContrasenia.setError("La contraseña es obligatoria");
             valido = false;
@@ -87,35 +81,23 @@ public class LoginActivity extends AppCompatActivity {
         String correo      = etCorreo.getText().toString().trim();
         String contrasenia = etContrasenia.getText().toString().trim();
 
-        // Basic Auth: Base64(correo:contrasenia)
-        String credenciales = correo + ":" + contrasenia;
         String basicAuth = "Basic " + Base64.encodeToString(
-                credenciales.getBytes(), Base64.NO_WRAP
-        );
+                (correo + ":" + contrasenia).getBytes(), Base64.NO_WRAP);
 
-        // Bloquea formulario y muestra ProgressBar
         setFormularioHabilitado(false);
 
         PizzasService service = ApiClient.getService();
         service.iniciarSesion(basicAuth).enqueue(new Callback<SesionResponse>() {
             @Override
-            public void onResponse(Call<SesionResponse> call,
-                                   Response<SesionResponse> response) {
+            public void onResponse(Call<SesionResponse> call, Response<SesionResponse> response) {
                 setFormularioHabilitado(true);
 
                 if (response.isSuccessful() && response.body() != null) {
                     SesionResponse body = response.body();
-
-                    // Guarda token y datos de sesión
                     new SesionManager(LoginActivity.this).guardarSesion(
-                            body.getToken(),
-                            body.getExpiracion(),
-                            correo
-                    );
-
+                            body.getToken(), body.getExpiracion(), correo);
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
-
                 } else if (response.code() == 401) {
                     etContrasenia.setError("Contraseña incorrecta");
                     etContrasenia.requestFocus();
@@ -133,8 +115,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onFailure(Call<SesionResponse> call, Throwable t) {
                 setFormularioHabilitado(true);
                 Toast.makeText(LoginActivity.this,
-                        "Sin conexión, verifica tu internet",
-                        Toast.LENGTH_LONG).show();
+                        "Sin conexión, verifica tu internet", Toast.LENGTH_LONG).show();
             }
         });
     }

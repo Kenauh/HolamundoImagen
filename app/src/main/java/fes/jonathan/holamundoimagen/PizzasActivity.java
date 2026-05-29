@@ -17,10 +17,6 @@ import com.google.android.material.snackbar.Snackbar;
 import fes.jonathan.holamundoimagen.adapter.PizzaAdapter;
 import fes.jonathan.holamundoimagen.viewmodel.PizzasViewModel;
 
-/**
- * Catálogo de pizzas (Fase 2).
- * Corregida en Fase 4: setSupportActionBar + setDisplayHomeAsUpEnabled.
- */
 public class PizzasActivity extends AppCompatActivity {
 
     private PizzasViewModel viewModel;
@@ -32,7 +28,6 @@ public class PizzasActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pizzas);
 
-        // ── Toolbar azul con back ─────────────────────────────────────────
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -40,7 +35,6 @@ public class PizzasActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Pizzas");
         }
 
-        // ── Vistas ────────────────────────────────────────────────────────
         progressBar = findViewById(R.id.progressBar);
         RecyclerView rvPizzas = findViewById(R.id.rvPizzas);
 
@@ -48,14 +42,12 @@ public class PizzasActivity extends AppCompatActivity {
         rvPizzas.setLayoutManager(new GridLayoutManager(this, 2));
         rvPizzas.setAdapter(adapter);
 
-        // ── ViewModel ─────────────────────────────────────────────────────
         viewModel = new ViewModelProvider(this).get(PizzasViewModel.class);
 
         viewModel.isLoading().observe(this, loading ->
                 progressBar.setVisibility(loading ? View.VISIBLE : View.GONE));
 
-        viewModel.getPizzas().observe(this, pizzas ->
-                adapter.submitList(pizzas));
+        viewModel.getPizzas().observe(this, pizzas -> adapter.submitList(pizzas));
 
         viewModel.getError().observe(this, msg -> {
             if (msg != null && !msg.isEmpty())

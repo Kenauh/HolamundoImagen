@@ -27,13 +27,6 @@ import fes.jonathan.holamundoimagen.models.ProductoDto;
 import fes.jonathan.holamundoimagen.models.TamanioDto;
 import fes.jonathan.holamundoimagen.viewmodel.PizzasViewModel;
 
-/**
- * Detalle de pizza — Fase 4 corregida.
- *
- * Correcciones:
- *  - Toolbar azul con setSupportActionBar + setDisplayHomeAsUpEnabled(true)
- *  - URL de imagen construida correctamente (BASE sin slash final)
- */
 public class PizzaDetalleActivity extends AppCompatActivity {
 
     private static final String BASE_IMG_URL = "https://utilidades.vmartinez84.xyz";
@@ -57,14 +50,10 @@ public class PizzaDetalleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pizza_detalle);
 
-        // ── Toolbar azul con back ─────────────────────────────────────────
         Toolbar toolbar = findViewById(R.id.toolbarDetalle);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // ── Vistas ────────────────────────────────────────────────────────
         rootView          = findViewById(R.id.rootDetalle);
         imgDetalle        = findViewById(R.id.imgDetalle);
         tvNombreDetalle   = findViewById(R.id.tvNombreDetalle);
@@ -74,7 +63,6 @@ public class PizzaDetalleActivity extends AppCompatActivity {
         btnAgregarCarrito = findViewById(R.id.btnAgregarCarrito);
         progressBar       = findViewById(R.id.progressDetalle);
 
-        // ── Datos del Intent ──────────────────────────────────────────────
         int    id     = getIntent().getIntExtra("id", 0);
         String nombre = getIntent().getStringExtra("nombre");
         String desc   = getIntent().getStringExtra("descripcion");
@@ -87,25 +75,16 @@ public class PizzaDetalleActivity extends AppCompatActivity {
         pizzaActual.setDescripcion(desc);
         pizzaActual.setRuta(ruta);
 
-        // ── Poblar vistas estáticas ───────────────────────────────────────
         if (getSupportActionBar() != null) getSupportActionBar().setTitle(nombre != null ? nombre : "Detalle");
         tvNombreDetalle.setText(nombre != null ? nombre : "");
 
-        // Descripción o ingredientes
-        String detalle = "";
-        if (ingred != null && !ingred.isEmpty()) detalle = ingred;
-        else if (desc != null && !desc.isEmpty()) detalle = desc;
+        String detalle = (ingred != null && !ingred.isEmpty()) ? ingred
+                       : (desc   != null && !desc.isEmpty())   ? desc : "";
         tvDescDetalle.setText(detalle);
 
-        // ── Imagen con URL correcta ───────────────────────────────────────
         if (ruta != null && !ruta.isEmpty()) {
-            String imgUrl;
-            if (ruta.startsWith("http")) {
-                imgUrl = ruta;
-            } else {
-                // ruta puede venir como "/images/pizzas/xxx.png" o "images/pizzas/xxx.png"
-                imgUrl = BASE_IMG_URL + (ruta.startsWith("/") ? ruta : "/" + ruta);
-            }
+            String imgUrl = ruta.startsWith("http") ? ruta
+                    : BASE_IMG_URL + (ruta.startsWith("/") ? ruta : "/" + ruta);
             Glide.with(this)
                     .load(imgUrl)
                     .placeholder(android.R.drawable.ic_menu_gallery)
@@ -114,7 +93,6 @@ public class PizzaDetalleActivity extends AppCompatActivity {
                     .into(imgDetalle);
         }
 
-        // ── ViewModel ─────────────────────────────────────────────────────
         viewModel = new ViewModelProvider(this).get(PizzasViewModel.class);
 
         viewModel.isLoading().observe(this, loading ->
@@ -146,27 +124,21 @@ public class PizzaDetalleActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // ── Spinners ──────────────────────────────────────────────────────────
-
     private void poblarSpinnerTamanios(List<TamanioDto> lista) {
         List<String> opciones = new ArrayList<>();
-        for (TamanioDto t : lista) {
+        for (TamanioDto t : lista)
             opciones.add(t.getDescripcion() + "  —  $" + String.format("%.0f", t.getPrecio()));
-        }
         spinnerTamanio.setAdapter(new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_dropdown_item, opciones));
     }
 
     private void poblarSpinnerMasas(List<MasaDto> lista) {
         List<String> opciones = new ArrayList<>();
-        for (MasaDto m : lista) {
+        for (MasaDto m : lista)
             opciones.add(m.getNombre() != null ? m.getNombre() : "Masa " + m.getId());
-        }
         spinnerMasa.setAdapter(new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_dropdown_item, opciones));
     }
-
-    // ── Carrito ───────────────────────────────────────────────────────────
 
     private void agregarAlCarrito() {
         if (tamanios.isEmpty() || masas.isEmpty()) {
@@ -179,8 +151,7 @@ public class PizzaDetalleActivity extends AppCompatActivity {
 
         CarritoManager.getInstance().agregarPizza(pizzaActual, null, tam, masa);
 
-        Snackbar.make(rootView,
-                "¡" + pizzaActual.getNombre() + " agregada! 🍕",
+        Snackbar.make(rootView, "¡" + pizzaActual.getNombre() + " agregada! 🍕",
                 Snackbar.LENGTH_LONG)
                 .setAction("Ver carrito", v ->
                         startActivity(new android.content.Intent(this, CarritoActivity.class)))
