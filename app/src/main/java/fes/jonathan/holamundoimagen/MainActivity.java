@@ -4,8 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,24 +14,22 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 
+import fes.jonathan.holamundoimagen.carrito.CarritoManager;
+
+/**
+ * Pantalla principal — menú de categorías.
+ *
+ * Correcciones Fase 4:
+ *  - URLs de imágenes arregladas: base correcta es https://utilidades.vmartinez84.xyz
+ *  - Cada categoría navega a CatalogoActivity con el extra "categoria"
+ *  - FAB de carrito con badge de cantidad
+ *  - Botón de historial de órdenes
+ *  - Login/CerrarSesión se mantienen
+ */
 public class MainActivity extends AppCompatActivity {
 
-    ImageView imageView;
-    ImageButton imageButton;
-    ImageButton imageButton2;
-    ImageButton imageButton3;
-    ImageButton imageButton4;
-    ImageButton imageButton5;
-
-
-
-    String baseUrl = "https://2d99lsm9-3000.usw3.devtunnels.ms";
-
-    String url = baseUrl + "/images/menus/breads.png";
-    String url2 = baseUrl + "/images/menus/pizza.png";
-    String url3 = baseUrl + "/images/menus/chicken.png";
-    String url4 = baseUrl + "/images/menus/dessert.png";
-    String url5 = baseUrl + "/images/menus/drinks.png";
+    // URL base CORRECTA — sin el path de la API
+    private static final String BASE = "https://utilidades.vmartinez84.xyz";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,34 +42,70 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // ── Cargar imágenes de menú con URLs correctas ──────────────────
+        ImageButton btnPizzas     = findViewById(R.id.imageButton);
+        ImageButton btnEntradas   = findViewById(R.id.imageButton2);
+        ImageButton btnPollo      = findViewById(R.id.imageButton3);
+        ImageButton btnPostres    = findViewById(R.id.imageButton4);
+        ImageButton btnBebidas    = findViewById(R.id.imageButton5);
 
-        ImageButton imageButton = findViewById(R.id.imageButton);
-        ImageButton imageButton2 = findViewById(R.id.imageButton2);
-        ImageButton imageButton3 = findViewById(R.id.imageButton3);
-        ImageButton imageButton4 = findViewById(R.id.imageButton4);
-        ImageButton imageButton5 = findViewById(R.id.imageButton5);
+        Glide.with(this).load(BASE + "/images/menus/pizza.png")   .into(btnPizzas);
+        Glide.with(this).load(BASE + "/images/menus/breads.png")  .into(btnEntradas);
+        Glide.with(this).load(BASE + "/images/menus/chicken.png") .into(btnPollo);
+        Glide.with(this).load(BASE + "/images/menus/dessert.png") .into(btnPostres);
+        Glide.with(this).load(BASE + "/images/menus/drinks.png")  .into(btnBebidas);
 
-
-
-        Glide.with(this).load(url2).into(imageButton);
-        Glide.with(this).load(url).into(imageButton2);
-        Glide.with(this).load(url3).into(imageButton3);
-        Glide.with(this).load(url4).into(imageButton4);
-        Glide.with(this).load(url5).into(imageButton5);
-
-
-
-
+        // ── Badge del carrito en el FAB ──────────────────────────────────
+        actualizarBadgeCarrito();
     }
-    public void irALogin(View view) {
-        Intent intent = new Intent(this, LoginActivity.class);
-        startActivity(intent);
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refrescar badge cada vez que se vuelve a esta pantalla
+        actualizarBadgeCarrito();
     }
+
+    // ── Navegación al carrito ────────────────────────────────────────────
+
+    public void irAlCarrito(View view) {
+        startActivity(new Intent(this, CarritoActivity.class));
+    }
+
+    // ── Navegación al historial ──────────────────────────────────────────
+
+    public void irAlHistorial(View view) {
+        startActivity(new Intent(this, HistorialActivity.class));
+    }
+
+    // ── Navegación a categorías ──────────────────────────────────────────
 
     public void irAPizzas(View view) {
-        Intent intent = new Intent(this, pizzas.class);
-        startActivity(intent);
+        abrirCatalogo(CatalogoActivity.CAT_PIZZAS);
     }
+
+    public void Entradas(View view) {
+        abrirCatalogo(CatalogoActivity.CAT_ADICIONALES);
+    }
+
+    public void Pollo(View view) {
+        abrirCatalogo(CatalogoActivity.CAT_POLLOS);
+    }
+
+    public void Postres(View view) {
+        abrirCatalogo(CatalogoActivity.CAT_ADICIONALES);
+    }
+
+    public void Bebidas(View view) {
+        abrirCatalogo(CatalogoActivity.CAT_BEBIDAS);
+    }
+
+    // ── Login / Cerrar sesión ────────────────────────────────────────────
+
+    public void irALogin(View view) {
+        startActivity(new Intent(this, LoginActivity.class));
+    }
+
     public void cerrarSesion(View view) {
         new SesionManager(this).cerrarSesion();
         Intent intent = new Intent(this, LoginActivity.class);
@@ -80,23 +113,23 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void pizza(View view) {
+    // ── Helpers ─────────────────────────────────────────────────────────
 
-        Toast.makeText(this, "Pizza", Toast.LENGTH_SHORT).show();
-    }
-    public void Entradas(View view) {
-        Toast.makeText(this, "Entradas", Toast.LENGTH_SHORT).show();
-    }
-    public void Pollo(View view) {
-        Toast.makeText(this, "Pollo", Toast.LENGTH_SHORT).show();
-    }
-    public void Postres(View view) {
-        Toast.makeText(this, "Postres", Toast.LENGTH_SHORT).show();
-    }
-    public void Bebidas(View view) {
-        Toast.makeText(this, "Bebidas", Toast.LENGTH_SHORT).show();
+    private void abrirCatalogo(String categoria) {
+        Intent intent = new Intent(this, CatalogoActivity.class);
+        intent.putExtra(CatalogoActivity.EXTRA_CATEGORIA, categoria);
+        startActivity(intent);
     }
 
-
-
+    private void actualizarBadgeCarrito() {
+        TextView badge = findViewById(R.id.badgeCarrito);
+        if (badge == null) return;
+        int cantidad = CarritoManager.getInstance().getItems().size();
+        if (cantidad > 0) {
+            badge.setVisibility(View.VISIBLE);
+            badge.setText(String.valueOf(cantidad));
+        } else {
+            badge.setVisibility(View.GONE);
+        }
+    }
 }

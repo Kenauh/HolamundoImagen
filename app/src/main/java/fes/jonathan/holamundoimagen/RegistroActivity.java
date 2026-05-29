@@ -12,12 +12,19 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import fes.jonathan.holamundoimagen.models.ClienteModel;
-import fes.jonathan.holamundoimagen.models.SesionResponse;
+import fes.jonathan.holamundoimagen.models.IdDto;
 import fes.jonathan.holamundoimagen.services.PizzasService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Pantalla de registro de nuevo cliente.
+ *
+ * CAMBIOS respecto a la versión anterior:
+ *   - Callback ahora usa IdDto (respuesta real del Swagger para POST /Clientes).
+ *   - La validación de nombre y apellidos delega en Validador.java.
+ */
 public class RegistroActivity extends AppCompatActivity {
 
     private EditText etNombre, etApellidos, etCorreo, etContrasenia;
@@ -53,54 +60,54 @@ public class RegistroActivity extends AppCompatActivity {
         String contrasenia = etContrasenia.getText().toString().trim();
         boolean valido = true;
 
-        // Nombre
+        // Nombre — usa Validador en lugar de duplicar la regex
         if (nombre.isEmpty()) {
             etNombre.setError("El nombre es obligatorio");
             valido = false;
-        } else if (!nombre.matches("[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ ]+")) {
+        } else if (!Validador.esNombreValido(nombre)) {
             etNombre.setError("Solo letras, sin números ni caracteres especiales");
             valido = false;
-        } else if (nombre.length() < 2 || nombre.length() > 50) {
+        } else if (!Validador.largoValido(nombre, 2, 50)) {
             etNombre.setError("Entre 2 y 50 caracteres");
             valido = false;
         } else {
             etNombre.setError(null);
         }
 
-        // Apellidos
+        // Apellidos — usa Validador
         if (apellidos.isEmpty()) {
             etApellidos.setError("Los apellidos son obligatorios");
             valido = false;
-        } else if (!apellidos.matches("[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ ]+")) {
+        } else if (!Validador.esNombreValido(apellidos)) {
             etApellidos.setError("Solo letras, sin números ni caracteres especiales");
             valido = false;
-        } else if (apellidos.length() < 2 || apellidos.length() > 50) {
+        } else if (!Validador.largoValido(apellidos, 2, 50)) {
             etApellidos.setError("Entre 2 y 50 caracteres");
             valido = false;
         } else {
             etApellidos.setError(null);
         }
 
-        // Correo
+        // Correo — usa Validador
         if (correo.isEmpty()) {
             etCorreo.setError("El correo es obligatorio");
             valido = false;
-        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(correo).matches()) {
+        } else if (!Validador.esCorreoValido(correo)) {
             etCorreo.setError("Correo no válido");
             valido = false;
         } else {
             etCorreo.setError(null);
         }
 
-        // Contraseña
+        // Contraseña — usa Validador (mín 8, máx 12 según Swagger)
         if (contrasenia.isEmpty()) {
             etContrasenia.setError("La contraseña es obligatoria");
             valido = false;
-        } else if (contrasenia.length() < 8) {
+        } else if (!Validador.esContraseniaValida(contrasenia)) {
             etContrasenia.setError("Mínimo 8 caracteres");
             valido = false;
-        } else if (contrasenia.length() > 100) {
-            etContrasenia.setError("Máximo 100 caracteres");
+        } else if (!Validador.largoValido(contrasenia, 8, 12)) {
+            etContrasenia.setError("Máximo 12 caracteres");
             valido = false;
         } else {
             etContrasenia.setError(null);
@@ -115,33 +122,34 @@ public class RegistroActivity extends AppCompatActivity {
         String correo      = etCorreo.getText().toString().trim();
         String contrasenia = etContrasenia.getText().toString().trim();
 
-        String encodedKey = Base64.encodeToString(
-                correo.getBytes(), Base64.NO_WRAP
-        );
+        String encodedKey = Base64.encodeToString(correo.getBytes(), Base64.NO_WRAP);
 
         ClienteModel cliente = new ClienteModel(
                 encodedKey, nombre, apellidos, correo, contrasenia
         );
 
-        // Bloquea formulario y muestra ProgressBar
         setFormularioHabilitado(false);
 
         PizzasService service = ApiClient.getService();
-        service.registrarCliente(cliente).enqueue(new Callback<SesionResponse>() {
+
+        // ── Ahora usa IdDto — tipo correcto según el Swagger ──
+        service.registrarCliente(cliente).enqueue(new Callback<IdDto>() {
             @Override
-            public void onResponse(Call<SesionResponse> call,
-                                   Response<SesionResponse> response) {
-                // Desbloquea formulario y oculta ProgressBar
+            public void onResponse(Call<IdDto> call, Response<IdDto> response) {
                 setFormularioHabilitado(true);
 
                 if (response.code() == 201) {
+                    // Cuenta creada exitosamente
                     Toast.makeText(RegistroActivity.this,
                             "¡Cuenta creada! Ya puedes iniciar sesión",
                             Toast.LENGTH_LONG).show();
                     finish();
+
                 } else if (response.code() == 200) {
+                    // El servidor devuelve 200 cuando el correo ya está registrado
                     etCorreo.setError("Este correo ya está registrado");
                     etCorreo.requestFocus();
+
                 } else {
                     Toast.makeText(RegistroActivity.this,
                             "Error " + response.code() + ", intenta de nuevo",
@@ -150,7 +158,7 @@ public class RegistroActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<SesionResponse> call, Throwable t) {
+            public void onFailure(Call<IdDto> call, Throwable t) {
                 setFormularioHabilitado(true);
                 Toast.makeText(RegistroActivity.this,
                         "Sin conexión, verifica tu internet",
